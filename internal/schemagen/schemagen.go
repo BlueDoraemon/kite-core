@@ -30,6 +30,55 @@ func Generate(dir string) ([]string, error) {
 		return nil, err
 	}
 	schemas := map[string]Schema{
+		"lint.json": {
+			Schema:  "https://json-schema.org/draft/2020-12/schema",
+			Title:   "Kite Lint Report",
+			Version: "kite.lint/v1",
+			Type:    "object",
+			Properties: map[string]any{
+				"version": map[string]any{"type": "string", "const": "kite.lint/v1"},
+				"layers":  map[string]any{"type": "array", "items": map[string]any{"type": "string"}},
+				"summary": map[string]any{
+					"type": "object",
+					"properties": map[string]any{
+						"files":         map[string]any{"type": "integer"},
+						"deterministic": map[string]any{"type": "integer"},
+						"vale":          map[string]any{"type": "integer"},
+						"llm":           map[string]any{"type": "integer"},
+						"errors":        map[string]any{"type": "integer"},
+						"warnings":      map[string]any{"type": "integer"},
+						"info":          map[string]any{"type": "integer"},
+					},
+				},
+				"findings": map[string]any{
+					"type": "array",
+					"items": map[string]any{
+						"type": "object",
+						"properties": map[string]any{
+							"layer":      map[string]any{"type": "string"},
+							"rule":       map[string]any{"type": "string"},
+							"severity":   map[string]any{"type": "string", "enum": []string{"error", "warning", "info"}},
+							"path":       map[string]any{"type": "string"},
+							"line":       map[string]any{"type": "integer"},
+							"column":     map[string]any{"type": "integer"},
+							"message":    map[string]any{"type": "string"},
+							"suggestion": map[string]any{"type": "string"},
+						},
+					},
+				},
+				"skipped": map[string]any{
+					"type": "array",
+					"items": map[string]any{
+						"type": "object",
+						"properties": map[string]any{
+							"path":   map[string]any{"type": "string"},
+							"reason": map[string]any{"type": "string"},
+						},
+					},
+				},
+			},
+			Required: []string{"version", "layers", "summary", "findings"},
+		},
 		"event.json": {
 			Schema:  "https://json-schema.org/draft/2020-12/schema",
 			Title:   "Kite Event",

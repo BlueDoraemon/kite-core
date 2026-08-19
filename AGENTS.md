@@ -38,6 +38,8 @@ all release targets cross-compile.
   built-in installer with core via `core.RegisterBuiltins` (no import cycle).
 - `internal/persist` — (unused; persistence lives in `internal/core/store.go`).
 - `internal/rpc` — the NDJSON RPC protocol.
+- `internal/lint` — deterministic repository checks, optional Vale JSON
+  normalization, and the bounded advisory model-review layer.
 - `internal/tui` — the ANSI/plain-text event-ledger terminal workspace. It is
   a view over `core.Session`, never a second agent loop.
 - `internal/crush` — reads Crush's persisted config for `--from-crush`.
@@ -89,6 +91,8 @@ POSIX (`sh -c`, process groups) and Windows (`cmd.exe /C`, `taskkill /T`).
   escape the working directory.
 - Credentials: never log API keys or OAuth tokens. Errors must be
   secret-free.
+- Lint model review is opt-in, sends at most 128 KiB of sorted source, exposes
+  no tools, validates returned paths, and is advisory unless explicitly strict.
 - Shell: commands run with a 30-second timeout and their process tree is
   killed on timeout. Verification runs are marked with `purpose:
   "verification"`.

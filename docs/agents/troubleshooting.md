@@ -55,6 +55,15 @@ the `.lease` file if you are sure no other process is running.
 the issue, and re-run. Worktree changes after a verification mark the result
 stale until verification runs again.
 
+## Vale lint failures
+
+**Symptom:** `kite lint -vale` reports that the Vale executable cannot be
+started or its output is invalid.
+
+**Fix:** Install Vale and confirm `vale --output=JSON <path>` succeeds from the
+repository root. Use `-vale-bin <path>` for a nonstandard installation and
+check `.vale.ini` plus `StylesPath` when Vale reports configuration errors.
+
 ## Platform shell differences
 
 **Symptom:** A bash command behaves differently on Windows.
@@ -67,3 +76,4 @@ syntax in commands you expect to run cross-platform.
 - [Providers](providers.md)
 - [Security](security.md)
 - [Recipes](recipes.md)
+- [Layered lint](lint.md)

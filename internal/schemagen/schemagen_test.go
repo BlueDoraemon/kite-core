@@ -13,8 +13,8 @@ func TestGenerateProducesValidJSON(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(written) != 4 {
-		t.Fatalf("generated %d schemas, want 4", len(written))
+	if len(written) != 5 {
+		t.Fatalf("generated %d schemas, want 5", len(written))
 	}
 	for _, w := range written {
 		data, err := os.ReadFile(w)

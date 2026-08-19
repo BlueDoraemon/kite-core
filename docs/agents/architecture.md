@@ -6,6 +6,12 @@ Kite's runtime flows through a small set of stages:
 session -> context -> provider -> tools -> artifacts -> events -> interfaces
 ```
 
+Repository linting is a sibling pipeline rather than part of the agent loop:
+
+```text
+files -> deterministic checks -> optional Vale -> optional LLM review -> report
+```
+
 ## Session
 
 A `Session` carries the conversation, the model, and durable state. It is
@@ -61,9 +67,17 @@ from `Session.Prompt`; it neither invokes tools directly nor maintains a second
 conversation state. ANSI styling is applied only after model, tool, path, and
 error content has been stripped of terminal control bytes.
 
+## Layered lint
+
+`internal/lint` owns an independent `kite.lint/v1` report. Its built-in checks
+and optional Vale adapter are deterministic and sorted. The model layer is
+bounded, tool-free, path-validated, and advisory by default, so nondeterminism
+cannot silently become the repository's required gate.
+
 ## See also
 
 - [Go API](go-api.md)
 - [Events](events.md)
 - [Sessions](sessions.md)
 - [Terminal UI](tui.md)
+- [Layered lint](lint.md)

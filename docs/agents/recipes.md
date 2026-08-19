@@ -9,6 +9,18 @@ kite run "the test suite is failing; find the failures and fix them"
 The agent reads, edits, and runs a verification bash command with
 `purpose: "verification"`. A passing verification means the fix holds.
 
+## Layer style checks
+
+```sh
+kite lint                         # offline, reproducible checks
+kite lint -vale docs              # merge configured Vale alerts
+kite lint -vale -llm docs         # add advisory model review
+kite lint -json docs > lint.json  # stable machine contract
+```
+
+Vale remains responsible for markup-aware prose rules and `.vale.ini`.
+Kite's model layer is bounded and advisory unless `-llm-strict` is set.
+
 ## Resume after cancellation
 
 ```sh

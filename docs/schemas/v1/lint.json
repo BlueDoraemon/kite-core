@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Kite Lint Report",
+  "version": "kite.lint/v1",
+  "type": "object",
+  "properties": {
+    "findings": {
+      "items": {
+        "properties": {
+          "column": {
+            "type": "integer"
+          },
+          "layer": {
+            "type": "string"
+          },
+          "line": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "rule": {
+            "type": "string"
+          },
+          "severity": {
+            "enum": [
+              "error",
+              "warning",
+              "info"
+            ],
+            "type": "string"
+          },
+          "suggestion": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "layers": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "skipped": {
+      "items": {
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "summary": {
+      "properties": {
+        "deterministic": {
+          "type": "integer"
+        },
+        "errors": {
+          "type": "integer"
+        },
+        "files": {
+          "type": "integer"
+        },
+        "info": {
+          "type": "integer"
+        },
+        "llm": {
+          "type": "integer"
+        },
+        "vale": {
+          "type": "integer"
+        },
+        "warnings": {
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "version": {
+      "const": "kite.lint/v1",
+      "type": "string"
+    }
+  },
+  "required": [
+    "version",
+    "layers",
+    "summary",
+    "findings"
+  ]
+}

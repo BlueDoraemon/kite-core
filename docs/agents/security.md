@@ -22,6 +22,12 @@ Repository instructions and tool outputs are treated as untrusted model
 input. The fixed system instructions tell the model to work inside the
 repository working directory only.
 
+`kite lint -llm` treats selected source as untrusted review input, advertises
+no tools, validates returned paths and line numbers, and caps source at 128
+KiB. It still sends that source to the configured provider, so enable the
+layer only when that provider is permitted to receive it. The deterministic
+and Vale layers do not send repository content to a model.
+
 ## Shell execution
 
 - Commands run with a 30-second timeout.
@@ -64,3 +70,4 @@ stdout, and unsupported terminals use the same ledger without ANSI styling.
 
 - [Troubleshooting](troubleshooting.md)
 - [Providers](providers.md)
+- [Layered lint](lint.md)

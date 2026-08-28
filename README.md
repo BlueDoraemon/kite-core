@@ -55,7 +55,7 @@ kite run --from-crush "explain this repository"
 | `KITE_THEME` | `-theme` on `tui` | `night-flight` | Terminal workspace theme |
 
 See [Providers](docs/agents/providers.md) for configuration precedence and
-`--from-crush` behavior.
+`--from-crush` behaviour.
 
 ### Your first successful task
 

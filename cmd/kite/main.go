@@ -179,7 +179,7 @@ func cmdTUI(args []string) int {
 		model     = fs.String("model", "", "model to use")
 		fromCrush = fs.Bool("from-crush", false, "import model, credential, and endpoint from Crush")
 		themeName = fs.String("theme", envOr("KITE_THEME", "night-flight"), "terminal theme: night-flight, paper-trail, or high-contrast")
-		plain     = fs.Bool("plain", false, "disable ANSI color and screen clearing")
+		plain     = fs.Bool("plain", false, "disable ANSI colour and screen clearing")
 	)
 	if err := fs.Parse(args); err != nil {
 		return 2

@@ -72,7 +72,9 @@ func Load() (*Imported, error) {
 	case "openai", "openai-compat":
 		imp.Provider = p.Type
 	case "hyper":
-		return nil, fmt.Errorf("crush: the Hyper provider is not supported by kite; use an OpenAI or OpenAI-compatible provider")
+		// Hyper exposes an OpenAI-compatible chat completions endpoint, so
+		// its credential can be imported like any other compatible provider.
+		imp.Provider = p.Type
 	default:
 		return nil, fmt.Errorf("crush: provider type %q is not supported by kite", p.Type)
 	}

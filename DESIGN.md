@@ -84,7 +84,7 @@ components:
 
 Kite presents one chronological record, shaped like source-control output rather than a dashboard. Durable event order is the navigation: prompts, turns, tool calls, artifacts, verification, results, and resumptions remain in one scan path. The interface is concise, capable, transparent, and calm under failure.
 
-The system is terminal-native and information-dense. A single monospace size, sequence gutters, one-cell indentation, square geometry, and horizontal rules create hierarchy without ornamental containers. Color reinforces meaning but never owns it; every state remains legible through a literal marker or label.
+The system is terminal-native and information-dense. A single monospace size, sequence gutters, one-cell indentation, square geometry, and horizontal rules create hierarchy without ornamental containers. Colour reinforces meaning but never owns it; every state remains legible through a literal marker or label.
 
 **Key Characteristics:**
 
@@ -94,7 +94,7 @@ The system is terminal-native and information-dense. A single monospace size, se
 - Strict monospace typography at the terminal's configured size.
 - Useful ANSI-free output with the same content order and labels.
 
-## Colors
+## Colour
 
 Three role-identical palettes change atmosphere without changing meaning or ledger structure.
 
@@ -112,13 +112,13 @@ Three role-identical palettes change atmosphere without changing meaning or ledg
 
 ### Neutral
 
-- **Background:** Each theme paints one continuous terminal canvas; there are no nested surface colors.
+- **Background:** Each theme paints one continuous terminal canvas; there are no nested surface colours.
 - **Text:** The primary foreground carries event copy, paths, commands, and assistant output.
 - **Muted:** Secondary metadata, preview gutters, command hints, repository context, and usage totals recede without disappearing.
 
 ### Named Rules
 
-**The Marker Before Color Rule.** State must remain explicit in `[ok]`, `[fail]`, `[run]`, `[stop]`, `[stale]`, `[resume]`, `[file]`, or equivalent text before palette color is applied.
+**The Marker Before Colour Rule.** State must remain explicit in `[ok]`, `[fail]`, `[run]`, `[stop]`, `[stale]`, `[resume]`, `[file]`, or equivalent text before palette colour is applied.
 
 **The Complete Palette Rule.** A theme switch replaces background, text, accent, success, warning, failure, and muted roles together; never recolor a single state in isolation.
 
@@ -175,7 +175,7 @@ A tool begins with the accent `+ TOOL` marker and its name. Up to three input li
 
 ### Result Seal
 
-The `RESULT` rule closes a run into a compact summary: explicit completion state, changed files, verification status including staleness, and total token usage. Separate verification ledger rows use `[ok]`, `[fail]`, or `[stale]`, so their state remains explicit when color is unavailable.
+The `RESULT` rule closes a run into a compact summary: explicit completion state, changed files, verification status including staleness, and total token usage. Separate verification ledger rows use `[ok]`, `[fail]`, or `[stale]`, so their state remains explicit when colour is unavailable.
 
 ### Composer
 
@@ -191,22 +191,22 @@ When ANSI is unavailable, output is redirected, `NO_COLOR` is set, `TERM=dumb`, 
 
 ### Control-Byte Safety
 
-Model, tool, path, and event content is sanitized before rendering. Newlines remain structural, tabs become one space, C0/C1 controls and bidirectional formatting controls are removed, and display-width truncation accounts for combining and wide characters.
+Model, tool, path, and event content is sanitised before rendering. Newlines remain structural, tabs become one space, C0/C1 controls and bidirectional formatting controls are removed, and display-width truncation accounts for combining and wide characters.
 
 ## Do's and Don'ts
 
 ### Do:
 
 - **Do** preserve one chronological ledger with four-digit sequence gutters and explicit state labels.
-- **Do** use the active theme's complete seven-role palette and keep every state understandable without color.
+- **Do** use the active theme's complete seven-role palette and keep every state understandable without colour.
 - **Do** retain one-cell indentation, square rules, bounded previews, and terminal-owned monospace typography.
-- **Do** sanitize untrusted content before it reaches ANSI rendering and preserve structural newlines.
+- **Do** sanitise untrusted content before it reaches ANSI rendering and preserve structural newlines.
 - **Do** keep theme changes non-destructive so earlier ledger rows remain available as navigation.
 
 ### Don't:
 
 - **Don't** turn events, tools, or results into unrelated cards, dashboard columns, tabs, pills, or rounded web controls.
-- **Don't** use color, icons, or animation as the only indication of running, success, warning, failure, interruption, or staleness.
+- **Don't** use colour, icons, or animation as the only indication of running, success, warning, failure, interruption, or staleness.
 - **Don't** add shadows, elevation, gradients, ornamental borders, or a second typography scale.
 - **Don't** print unbounded tool output into the live ledger when durable artifact or session inspection is available.
 - **Don't** let model or tool content emit terminal controls or bidirectional overrides.

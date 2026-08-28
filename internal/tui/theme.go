@@ -9,7 +9,7 @@ import (
 type rgb struct{ r, g, b int }
 
 // Theme is a complete terminal palette. State always has a textual marker;
-// these colors reinforce meaning but never carry it alone.
+// these colours reinforce meaning but never carry it alone.
 type Theme struct {
 	Name       string
 	Background rgb

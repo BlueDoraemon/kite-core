@@ -189,7 +189,7 @@ func TestAppStripsTerminalControlSequencesFromEventContent(t *testing.T) {
 		t.Fatalf("output contains terminal control bytes: %q", output.String())
 	}
 	if !strings.Contains(output.String(), "safe[2Jtext") || !strings.Contains(output.String(), "oops]0;owned") {
-		t.Fatalf("sanitized content was not preserved visibly: %q", output.String())
+		t.Fatalf("sanitised content was not preserved visibly: %q", output.String())
 	}
 }
 

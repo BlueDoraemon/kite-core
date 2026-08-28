@@ -35,11 +35,11 @@ API workflows remain first-class.
 
 - Runtime and documentation tooling remain Go standard-library only.
 - The TUI must work across release targets and degrade cleanly without ANSI
-  color or an interactive terminal.
+  colour or an interactive terminal.
 - Existing versioned event, result, and RPC v1 contracts remain compatible.
 - Credentials never appear in interface output or persisted errors.
-- Three selectable color themes are required, with meaning never conveyed by
-  color alone.
+- Three selectable colour themes are required, with meaning never conveyed by
+  colour alone.
 - Community extension areas include providers, tools, executors, policies,
   examples, integrations, documentation, and compatibility tests.
 
@@ -52,7 +52,7 @@ work without falling into generic neon-hacker styling.
 ## Evidence on Hand
 
 The repository contains the working runtime, executable CLI and RPC surfaces,
-behavioral tests, versioned schemas, agent documentation, and compiled examples.
+behavioural tests, versioned schemas, agent documentation, and compiled examples.
 There are no external brand assets or commercial claims to introduce.
 
 ## Product Principles
@@ -60,11 +60,11 @@ There are no external brand assets or commercial claims to introduce.
 - Keep the core small; make extension seams explicit.
 - Persist before presenting so recovery is trustworthy.
 - Show what the agent is doing without overwhelming the operator.
-- Prefer observable behavior and executable contracts over implied guarantees.
+- Prefer observable behaviour and executable contracts over implied guarantees.
 - Preserve a useful plain-text path everywhere.
 
 ## Accessibility & Inclusion
 
 The terminal interface supports keyboard-only operation, plain-text and
 `NO_COLOR` output, readable contrast, explicit status labels, and layouts that
-remain understandable when color and decorative glyphs are unavailable.
+remain understandable when colour and decorative glyphs are unavailable.

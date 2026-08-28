@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -88,5 +89,36 @@ func TestTUIExecutableRunsPlainInteractiveSession(t *testing.T) {
 	}
 	if strings.ContainsRune(text, '\x1b') {
 		t.Fatalf("kite tui -plain emitted ANSI escapes: %q", text)
+	}
+}
+
+func TestLintExecutableEmitsVersionedJSONAndFindingExit(t *testing.T) {
+	bin := filepath.Join(t.TempDir(), "kite")
+	build := exec.Command("go", "build", "-o", bin, ".")
+	if out, err := build.CombinedOutput(); err != nil {
+		t.Fatalf("build kite: %v\n%s", err, out)
+	}
+	root := t.TempDir()
+	if err := os.WriteFile(filepath.Join(root, "bad.txt"), []byte("trailing  \n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	cmd := exec.Command(bin, "lint", "-json", "bad.txt")
+	cmd.Dir = root
+	out, err := cmd.Output()
+	var exitErr *exec.ExitError
+	if !errors.As(err, &exitErr) || exitErr.ExitCode() != 1 {
+		t.Fatalf("kite lint error = %v, output = %s", err, out)
+	}
+	var report struct {
+		Version  string `json:"version"`
+		Findings []struct {
+			Rule string `json:"rule"`
+		} `json:"findings"`
+	}
+	if err := json.Unmarshal(out, &report); err != nil {
+		t.Fatalf("decode lint JSON: %v\n%s", err, out)
+	}
+	if report.Version != "kite.lint/v1" || len(report.Findings) != 1 || report.Findings[0].Rule != "KITE001" {
+		t.Fatalf("report = %+v", report)
 	}
 }

@@ -2,8 +2,8 @@
 // repository. It drives a model through an OpenAI-compatible API and gives it
 // read, edit, bash, and artifact tools to work with the current directory.
 //
-// Exit codes: 0 completed, 1 runtime or verification failure, 2 usage or
-// configuration error.
+// Exit codes: 0 completed, 1 runtime, verification, or lint failure, 2 usage
+// or configuration error.
 package main
 
 import (
@@ -19,6 +19,7 @@ import (
 
 	"github.com/BlueDoraemon/kite-core/internal/core"
 	"github.com/BlueDoraemon/kite-core/internal/crush"
+	kitelint "github.com/BlueDoraemon/kite-core/internal/lint"
 	"github.com/BlueDoraemon/kite-core/internal/provider/openai"
 	"github.com/BlueDoraemon/kite-core/internal/rpc"
 	"github.com/BlueDoraemon/kite-core/internal/tools"
@@ -41,6 +42,8 @@ func run(args []string) int {
 		return cmdRun(rest)
 	case "tui":
 		return cmdTUI(rest)
+	case "lint":
+		return cmdLint(rest)
 	case "resume":
 		return cmdResume(rest)
 	case "rpc":
@@ -69,6 +72,7 @@ func usage() {
 Usage:
   kite run [flags] <prompt>          Run a prompt in the current directory
   kite tui [flags] [session-id]      Open the interactive terminal workspace
+  kite lint [flags] [path ...]       Run deterministic and optional style review
   kite resume <session-id> [prompt]  Resume a session
   kite rpc                           Serve the NDJSON RPC protocol on stdin/stdout
   kite status [session-id]           Show session status
@@ -80,8 +84,90 @@ Environment:
   KITE_API_KEY, KITE_BASE_URL, KITE_MODEL, KITE_DATA_DIR, KITE_THEME, NO_COLOR
   --from-crush reads the Crush-selected large model, credential, and endpoint
 
-Exit codes: 0 completed, 1 runtime/verification failure, 2 usage/config error
+Exit codes: 0 completed, 1 runtime/verification/lint failure, 2 usage/config error
 `)
+}
+
+// cmdLint runs the reproducible repository lint layer and optional Vale and
+// provider-backed style review layers.
+func cmdLint(args []string) int {
+	fs := flag.NewFlagSet("lint", flag.ContinueOnError)
+	fs.SetOutput(os.Stderr)
+	var (
+		jsonOutput = fs.Bool("json", false, "emit the kite.lint/v1 JSON contract")
+		maxLine    = fs.Int("max-line", 120, "maximum line length in characters")
+		useVale    = fs.Bool("vale", false, "include alerts from an installed Vale CLI")
+		valeBinary = fs.String("vale-bin", "vale", "Vale executable used with -vale")
+		useLLM     = fs.Bool("llm", false, "include bounded provider-backed style review")
+		llmStrict  = fs.Bool("llm-strict", false, "let LLM warnings affect the exit code")
+		baseURL    = fs.String("base-url", "", "OpenAI-compatible API base URL for -llm")
+		model      = fs.String("model", "", "model to use for -llm")
+		fromCrush  = fs.Bool("from-crush", false, "import model, credential, and endpoint from Crush for -llm")
+	)
+	if err := fs.Parse(args); err != nil {
+		return 2
+	}
+	if *maxLine < 0 {
+		fmt.Fprintln(os.Stderr, "kite: -max-line must be non-negative")
+		return 2
+	}
+	if *llmStrict && !*useLLM {
+		fmt.Fprintln(os.Stderr, "kite: -llm-strict requires -llm")
+		return 2
+	}
+	dir, err := os.Getwd()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "kite:", err)
+		return 1
+	}
+	cfg := kitelint.Config{Root: dir, Paths: fs.Args(), MaxLine: *maxLine, Vale: *useVale, ValeBinary: *valeBinary}
+	if *useLLM {
+		provider, err := providerConfig(baseURL, model, *fromCrush)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "kite:", err)
+			return 2
+		}
+		cfg.Reviewer = kitelint.SessionReviewer{Provider: provider, Model: provider.Model}
+	}
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+	report, err := kitelint.Run(ctx, cfg)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "kite:", err)
+		return 1
+	}
+	if *jsonOutput {
+		enc := json.NewEncoder(os.Stdout)
+		enc.SetEscapeHTML(false)
+		if err := enc.Encode(report); err != nil {
+			fmt.Fprintln(os.Stderr, "kite:", err)
+			return 1
+		}
+	} else {
+		printLintReport(report)
+	}
+	for _, finding := range report.Findings {
+		if finding.Severity != "error" && finding.Severity != "warning" {
+			continue
+		}
+		if finding.Layer != "llm" || *llmStrict {
+			return 1
+		}
+	}
+	return 0
+}
+
+func printLintReport(report *kitelint.Report) {
+	for _, finding := range report.Findings {
+		fmt.Printf("%s:%d:%d: %s %s [%s/%s]\n", finding.Path, finding.Line, finding.Column, finding.Severity, finding.Message, finding.Layer, finding.Rule)
+		if finding.Suggestion != "" {
+			fmt.Printf("  suggestion: %s\n", finding.Suggestion)
+		}
+	}
+	for _, skipped := range report.Skipped {
+		fmt.Printf("skip %s: %s\n", skipped.Path, skipped.Reason)
+	}
+	fmt.Printf("linted %d files: %d deterministic, %d vale, %d llm findings\n", report.Summary.Files, report.Summary.Deterministic, report.Summary.Vale, report.Summary.LLM)
 }
 
 // cmdTUI opens an interactive, durable session workspace in the terminal.

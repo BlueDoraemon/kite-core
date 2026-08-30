@@ -73,9 +73,61 @@ func TestTUIRejectsUnknownThemeBeforeSessionSetup(t *testing.T) {
 	}
 }
 
+// TestRunGuidesWhenNoCredentialConfigured checks the first-run path: with no
+// key in the environment or config file, a remote default endpoint produces
+// actionable guidance rather than a provider 401.
+func TestRunGuidesWhenNoCredentialConfigured(t *testing.T) {
+	cmd := exec.Command("go", "run", ".", "run", "hello")
+	cmd.Env = []string{
+		"PATH=" + os.Getenv("PATH"),
+		"HOME=" + t.TempDir(),
+		"GOCACHE=" + os.Getenv("GOCACHE"),
+		"XDG_CONFIG_HOME=" + t.TempDir(),
+		"KITE_DATA_DIR=" + filepath.Join(t.TempDir(), "data"),
+	}
+	out, err := cmd.CombinedOutput()
+	text := string(out)
+	if !strings.Contains(text, "no model credential configured") || !strings.Contains(text, "KITE_API_KEY") {
+		t.Fatalf("guidance missing from output:\n%s", text)
+	}
+	var exitErr *exec.ExitError
+	if !errors.As(err, &exitErr) || exitErr.ExitCode() != 1 {
+		t.Fatalf("error = %v, want failure", err)
+	}
+}
+
+// TestRunReadsBaseURLFromConfigFile proves the config file is consulted by
+// the CLI: a request goes to the configured (unreachable) local endpoint.
+func TestRunReadsBaseURLFromConfigFile(t *testing.T) {
+	cfgDir := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(cfgDir, "kite"), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	cfg := `{"version":"kite.config/v1","base_url":"http://127.0.0.1:9/v1","model":"m","api_key":"k"}`
+	if err := os.WriteFile(filepath.Join(cfgDir, "kite", "config.json"), []byte(cfg), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	cmd := exec.Command("go", "run", ".", "run", "hello")
+	cmd.Env = []string{
+		"PATH=" + os.Getenv("PATH"),
+		"HOME=" + t.TempDir(),
+		"GOCACHE=" + os.Getenv("GOCACHE"),
+		"XDG_CONFIG_HOME=" + cfgDir,
+		"KITE_DATA_DIR=" + filepath.Join(t.TempDir(), "data"),
+	}
+	out, err := cmd.CombinedOutput()
+	text := string(out)
+	if !strings.Contains(text, "127.0.0.1:9") {
+		t.Fatalf("expected request to the configured endpoint:\n%s", text)
+	}
+	if err == nil {
+		t.Fatal("expected connection failure")
+	}
+}
+
 func TestTUIExecutableRunsPlainInteractiveSession(t *testing.T) {
 	cmd := exec.Command("go", "run", ".", "tui", "-plain", "-theme", "paper-trail")
-	cmd.Env = append(os.Environ(), "KITE_DATA_DIR="+filepath.Join(t.TempDir(), "data"))
+	cmd.Env = append(os.Environ(), "KITE_DATA_DIR="+filepath.Join(t.TempDir(), "data"), "KITE_API_KEY=test-key")
 	cmd.Stdin = strings.NewReader("/theme high-contrast\n/quit\n")
 	out, err := cmd.CombinedOutput()
 	if err != nil {

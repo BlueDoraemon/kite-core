@@ -50,7 +50,9 @@ Flags must precede positional arguments. For example, use
 | `KITE_THEME` | `night-flight` | Default TUI theme |
 | `NO_COLOR` | unset | Disable TUI colour when set |
 
-Configuration precedence is documented in [Providers](providers.md).
+Configuration precedence is flags > environment > config file > defaults. The
+config file lives at `$XDG_CONFIG_HOME/kite/config.json` (Unix) or
+`%APPDATA%\kite\config.json` (Windows); see [Providers](providers.md).
 
 ## Exit codes
 

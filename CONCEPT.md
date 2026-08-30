@@ -44,6 +44,13 @@ can be productive in under two minutes.
 
 ### What is in scope
 
+- **Config file** — `~/.config/kite/config.json` (Unix) and the platform
+  equivalent on Windows, user-only permissions, with precedence:
+  `flags > env > config file > defaults`. ✅ *done*
+- **First-run guidance** — `kite run` with no configuration explains how to
+  supply a credential instead of failing cryptically. ✅ *done*
+- **Provider presets** — a small table of known providers. Each preset knows
+  its base URL and a sensible default model.
 - **`kite setup`** — an interactive wizard that:
   - Detects existing configuration (env vars, config file, `--from-crush`
     availability).

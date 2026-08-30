@@ -4,9 +4,12 @@ Kite is designed with a small, explicit security model.
 
 ## Credential handling
 
-- API keys are read from environment variables or `--from-crush`, never
-  hard-coded.
-- Credentials are never logged.
+- API keys are read from environment variables, a `key_env` reference in the
+  config file, or `--from-crush`, never hard-coded. An inline `api_key` in
+  the config file is supported for convenience; the file is written with
+  user-only (`0600`) permissions where supported.
+- Credentials are never logged. Connection-probe errors redact the credential
+  even if a provider echoes it back.
 - Errors are sanitised and secret-free. A provider error never includes the
   API key, OAuth token, or full request body.
 

@@ -7,6 +7,7 @@
 | Command | Purpose |
 | --- | --- |
 | `kite run [flags] <prompt>` | Run a prompt in the current directory |
+| `kite setup [flags]` | Configure a provider and write the user config file |
 | `kite tui [flags] [session-id]` | Open or resume the interactive terminal workspace |
 | `kite lint [flags] [path ...]` | Run layered repository style checks |
 | `kite resume <session-id> [prompt]` | Resume a session |
@@ -20,8 +21,13 @@
 
 | Flag | Applies to | Purpose |
 | --- | --- | --- |
-| `-base-url <url>` | run, tui, resume, rpc, lint with `-llm` | OpenAI-compatible API base URL |
-| `-model <id>` | run, tui, resume, rpc, lint with `-llm` | Model identifier |
+| `-provider <name>` | setup | Select a preset: openai, groq, openrouter, moonshot, deepseek, ollama, custom |
+| `-base-url <url>` | setup, run, tui, resume, rpc, lint with `-llm` | OpenAI-compatible API base URL |
+| `-model <id>` | setup, run, tui, resume, rpc, lint with `-llm` | Model identifier |
+| `-api-key <key>` | setup | Store the credential inline in the config file |
+| `-key-env <var>` | setup | Reference an environment variable for the credential |
+| `-force` | setup | Replace an existing config file without asking |
+| `-skip-test` | setup | Skip the connection probe before saving |
 | `-from-crush` | run, tui, resume, rpc, lint with `-llm` | Import model, credential, and endpoint from Crush |
 | `-no-print` | run | Do not mirror output to stdout |
 | `-theme <name>` | tui | Select `night-flight`, `paper-trail`, or `high-contrast` |
@@ -53,6 +59,24 @@ Flags must precede positional arguments. For example, use
 Configuration precedence is flags > environment > config file > defaults. The
 config file lives at `$XDG_CONFIG_HOME/kite/config.json` (Unix) or
 `%APPDATA%\kite\config.json` (Windows); see [Providers](providers.md).
+
+## `kite setup`
+
+Guided provider configuration. Interactive mode lists the presets, accepts
+overrides, probes the connection with one minimal chat completion, and only
+then writes the config file with user-only permissions. Non-interactive mode
+activates when `-provider` or `-base-url` is supplied:
+
+```sh
+kite setup                                    # interactive wizard
+kite setup -provider openai -key-env OPENAI_API_KEY
+kite setup -provider ollama                   # local server, no key
+kite setup -base-url https://api.example.com/v1 -model m -key-env MY_KEY
+```
+
+A failed probe exits `1` and saves nothing unless an interactive session
+confirms otherwise. `-skip-test` bypasses the probe; `-force` replaces an
+existing file without asking.
 
 ## Exit codes
 

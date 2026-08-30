@@ -28,14 +28,29 @@ go build -o kite ./cmd/kite
 
 ## Five-minute quick start
 
-Set the model endpoint and key, then run:
+Configure a provider once (guided, with a connection test), then run:
 
 ```sh
-export KITE_API_KEY=sk-...
+kite setup
 kite run "explain this repository"
 kite run "add a --retries flag to the upload command"
 kite tui
 kite lint
+```
+
+`kite setup` lists known providers (OpenAI, Groq, OpenRouter, Moonshot,
+DeepSeek, Ollama, custom), writes `~/.config/kite/config.json`, and verifies
+the endpoint before saving. For scripting:
+
+```sh
+kite setup -provider openai -key-env OPENAI_API_KEY
+```
+
+Or skip the config file entirely with environment variables:
+
+```sh
+export KITE_API_KEY=sk-...
+kite run "explain this repository"
 ```
 
 To reuse the model, credential, and endpoint Crush has selected:

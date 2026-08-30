@@ -41,6 +41,8 @@ func run(args []string) int {
 	switch cmd {
 	case "run":
 		return cmdRun(rest)
+	case "setup":
+		return cmdSetup(rest)
 	case "tui":
 		return cmdTUI(rest)
 	case "lint":
@@ -72,6 +74,7 @@ func usage() {
 
 Usage:
   kite run [flags] <prompt>          Run a prompt in the current directory
+  kite setup [flags]                 Configure a provider and write the config file
   kite tui [flags] [session-id]      Open the interactive terminal workspace
   kite lint [flags] [path ...]       Run deterministic and optional style review
   kite resume <session-id> [prompt]  Resume a session
@@ -84,7 +87,7 @@ Usage:
 Environment:
   KITE_API_KEY, KITE_BASE_URL, KITE_MODEL, KITE_DATA_DIR, KITE_THEME, NO_COLOR
   Config file (XDG/APPDATA kite/config.json) supplies base URL, model, and key;
-  precedence is flags > environment > config file > defaults.
+  precedence is flags > environment > config file > defaults. Run "kite setup".
   --from-crush reads the Crush-selected large model, credential, and endpoint
 
 Exit codes: 0 completed, 1 runtime/verification/lint failure, 2 usage/config error

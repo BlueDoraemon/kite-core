@@ -45,8 +45,8 @@ cached endpoint without executing crushrc.
 
 Limitations:
 
-- Supports OpenAI and OpenAI-compatible providers only.
-- The Hyper provider is rejected.
+- Supports OpenAI, OpenAI-compatible, and Hyper providers (Hyper exposes an
+  OpenAI-compatible chat completions endpoint).
 - OAuth credentials that are expired or within 5 minutes of expiry are
   rejected.
 - Errors are secret-free and actionable.

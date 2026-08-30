@@ -43,16 +43,19 @@ func TestLoadOpenAICompat(t *testing.T) {
 	}
 }
 
-func TestLoadRejectsHyper(t *testing.T) {
+func TestLoadHyper(t *testing.T) {
 	parent := writeFixtures(t,
-		`[{"id":"hyper","type":"hyper","api_endpoint":"https://hyper.example.com"}]`,
-		`{"providers":{"hyper":{}},"models":{"large":{"model":"qwen","provider":"hyper"}}}`,
+		`[{"id":"hyper","type":"hyper","api_endpoint":"https://hyper.charm.land/v1"}]`,
+		`{"providers":{"hyper":{"api_key":"sk-hyper-test"}},"models":{"large":{"model":"qwen","provider":"hyper"}}}`,
 	)
 	t.Setenv("XDG_DATA_HOME", parent)
 
-	_, err := Load()
-	if err == nil || !strings.Contains(err.Error(), "Hyper") {
-		t.Fatalf("expected Hyper rejection, got %v", err)
+	imp, err := Load()
+	if err != nil {
+		t.Fatalf("load: %v", err)
+	}
+	if imp.Provider != "hyper" || imp.Model != "qwen" || imp.Endpoint != "https://hyper.charm.land/v1" || imp.APIKey != "sk-hyper-test" {
+		t.Fatalf("imported = %+v", imp)
 	}
 }
 

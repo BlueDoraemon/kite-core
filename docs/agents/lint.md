@@ -41,9 +41,9 @@ kite lint -vale -vale-bin /opt/bin/vale docs
 ```
 
 Kite invokes `vale --output=JSON`, so the repository's `.vale.ini`, styles,
-vocabulary, markup parsing, and ignore behavior remain owned by Vale. Vale
+vocabulary, markup parsing, and ignore behaviour remain owned by Vale. Vale
 `error` and `warning` alerts affect Kite's exit code; Vale `suggestion` alerts
-are normalized to `info`. The Vale check name is preserved as the rule ID.
+are normalised to `info`. The Vale check name is preserved as the rule ID.
 Vale is optional and is not downloaded or added as a Go dependency.
 
 ### LLM review

@@ -7,14 +7,6 @@
 **Fix:** Set `KITE_API_KEY` to a valid key, or use `--from-crush`. Check the
 base URL points at the right API root.
 
-## Unsupported Hyper provider
-
-**Symptom:** `--from-crush` fails with "the Hyper provider is not supported".
-
-**Fix:** Kite supports OpenAI and OpenAI-compatible providers only. Configure
-a supported provider in Crush, or set `KITE_API_KEY`/`KITE_BASE_URL`/`KITE_MODEL`
-directly.
-
 ## Expired Crush tokens
 
 **Symptom:** `--from-crush` fails with "the OAuth credential has expired or is

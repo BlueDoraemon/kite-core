@@ -58,12 +58,12 @@ Kite ships three complete palettes over the same layout and state grammar:
 - `high-contrast` — black, white, cyan, green, yellow, and red
 
 Select one with `kite tui -theme paper-trail`, set `KITE_THEME`, or switch with
-`/theme`. Short aliases `night`, `paper`, and `contrast` are accepted. Color is
+`/theme`. Short aliases `night`, `paper`, and `contrast` are accepted. Colour is
 never the only status signal.
 
 ## Plain and non-interactive output
 
-Use `kite tui -plain` to disable ANSI color and screen clearing. Kite also
+Use `kite tui -plain` to disable ANSI colour and screen clearing. Kite also
 chooses the plain path when stdout is redirected, `NO_COLOR` is set, `TERM` is
 `dumb`, or a Windows terminal does not advertise ANSI support. The event
 ledger and all status labels remain available in plain text.

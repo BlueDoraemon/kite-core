@@ -25,7 +25,7 @@
 | `-from-crush` | run, tui, resume, rpc, lint with `-llm` | Import model, credential, and endpoint from Crush |
 | `-no-print` | run | Do not mirror output to stdout |
 | `-theme <name>` | tui | Select `night-flight`, `paper-trail`, or `high-contrast` |
-| `-plain` | tui | Disable ANSI color and screen clearing |
+| `-plain` | tui | Disable ANSI colour and screen clearing |
 | `-json` | lint | Emit the `kite.lint/v1` JSON contract |
 | `-max-line <n>` | lint | Set maximum line length; `0` disables it |
 | `-vale` | lint | Include an installed Vale CLI's JSON alerts |
@@ -48,7 +48,7 @@ Flags must precede positional arguments. For example, use
 | `KITE_MODEL` | `gpt-4o-mini` | Model identifier |
 | `KITE_DATA_DIR` | XDG/LOCALAPPDATA | Where sessions and artifacts are stored |
 | `KITE_THEME` | `night-flight` | Default TUI theme |
-| `NO_COLOR` | unset | Disable TUI color when set |
+| `NO_COLOR` | unset | Disable TUI colour when set |
 
 Configuration precedence is documented in [Providers](providers.md).
 
@@ -66,7 +66,7 @@ diagnostics go to stderr.
 
 `kite tui` renders the same durable events as an interactive hunk ledger. It
 does not create a separate execution path. See [Terminal UI](tui.md) for its
-commands, themes, fallbacks, and safety behavior.
+commands, themes, fallbacks, and safety behaviour.
 
 `kite lint` is offline and deterministic unless `-vale` or `-llm` is
 selected. Vale alerts retain their rule names; model findings are visibly
@@ -75,6 +75,6 @@ advisory unless `-llm-strict` is selected. See [Layered lint](lint.md).
 ## `--from-crush`
 
 Reads the persisted Crush-selected large model, credential, and cached
-endpoint without executing crushrc. Supports OpenAI and OpenAI-compatible
-providers. Rejects Hyper, unsupported providers, missing endpoints, and
+endpoint without executing crushrc. Supports OpenAI, OpenAI-compatible, and
+Hyper providers. Rejects unsupported providers, missing endpoints, and
 expired or near-expiry OAuth credentials with actionable secret-free errors.

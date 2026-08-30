@@ -39,7 +39,7 @@ all release targets cross-compile.
 - `internal/persist` — (unused; persistence lives in `internal/core/store.go`).
 - `internal/rpc` — the NDJSON RPC protocol.
 - `internal/lint` — deterministic repository checks, optional Vale JSON
-  normalization, and the bounded advisory model-review layer.
+  normalisation, and the bounded advisory model-review layer.
 - `internal/tui` — the ANSI/plain-text event-ledger terminal workspace. It is
   a view over `core.Session`, never a second agent loop.
 - `internal/crush` — reads Crush's persisted config for `--from-crush`.
@@ -155,7 +155,7 @@ ignored on load. Update `docs/agents/sessions.md`.
 - The live acceptance test is opt-in (`KITE_LIVE_TEST=1`).
 - RPC framing is tested through its executable NDJSON interface.
 - TUI tests drive prompts and slash commands through its input/output boundary
-  and assert rendered event behavior, theme changes, recovery, and control-byte
-  sanitization.
+  and assert rendered event behaviour, theme changes, recovery, and control-byte
+  sanitisation.
 - Documentation validation regenerates and compares schemas, compiles the Go
   examples, and checks internal Markdown links.

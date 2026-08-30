@@ -90,7 +90,7 @@ func TestSetupInteractiveViaStdin(t *testing.T) {
 	env := setupEnv(t)
 	cmd := exec.Command("go", "run", ".", "setup", "-skip-test")
 	cmd.Env = env
-	cmd.Stdin = strings.NewReader("groq\n\n\nMY_GROQ_KEY\n")
+	cmd.Stdin = strings.NewReader("groq\n\n\nMY_GROQ_KEY\n\n")
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		t.Fatalf("interactive setup: %v\n%s", err, out)

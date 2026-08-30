@@ -71,27 +71,28 @@ func cmdSetup(args []string) int {
 			return 2
 		}
 		*provider = p.Name
-		fmt.Fprint(out, "Base URL ["+p.BaseURL+"]: ")
+		fmt.Fprint(out, "Base URL"+promptSuffix(p.BaseURL)+": ")
 		if v, _ := in.ReadString('\n'); strings.TrimSpace(v) != "" {
 			*baseURL = strings.TrimSpace(v)
 		} else {
 			*baseURL = p.BaseURL
 		}
-		fmt.Fprint(out, "Model ["+p.Model+"]: ")
+		fmt.Fprint(out, "Model"+promptSuffix(p.Model)+": ")
 		if v, _ := in.ReadString('\n'); strings.TrimSpace(v) != "" {
 			*model = strings.TrimSpace(v)
 		} else {
 			*model = p.Model
 		}
-		if p.NeedsKey || *keyEnv != "" || *apiKey != "" {
-			fmt.Fprint(out, "Environment variable holding your API key ["+envSuggestion(p)+"]: ")
+		// Every preset gets the credential question: local servers usually
+		// need none, and custom endpoints frequently do.
+		suggestion := envSuggestion(p)
+		fmt.Fprint(out, "Environment variable holding your API key"+promptSuffix(suggestion)+" (empty for none): ")
+		v, _ := in.ReadString('\n')
+		*keyEnv = strings.TrimSpace(v)
+		if *keyEnv == "" && p.NeedsKey {
+			fmt.Fprint(out, "Paste the API key to store inline (empty to skip): ")
 			v, _ := in.ReadString('\n')
-			*keyEnv = firstNonEmpty(strings.TrimSpace(v), envSuggestion(p))
-			if *keyEnv == "" {
-				fmt.Fprint(out, "Paste the API key to store inline (leave empty to skip): ")
-				v, _ := in.ReadString('\n')
-				*apiKey = strings.TrimSpace(v)
-			}
+			*apiKey = strings.TrimSpace(v)
 		}
 	} else {
 		if *provider != "" {
@@ -184,6 +185,13 @@ func ask(out *os.File, in *bufio.Reader, label, def string) string {
 	return def
 }
 
+func promptSuffix(def string) string {
+	if def == "" {
+		return ""
+	}
+	return " [" + def + "]"
+}
+
 func yes(s string) bool {
 	s = strings.ToLower(strings.TrimSpace(s))
 	return s == "y" || s == "yes"
@@ -204,15 +212,6 @@ func envSuggestion(p *config.Preset) string {
 	default:
 		return ""
 	}
-}
-
-func firstNonEmpty(vals ...string) string {
-	for _, v := range vals {
-		if v != "" {
-			return v
-		}
-	}
-	return ""
 }
 
 func apiKeyFor(cfg *config.File) string {

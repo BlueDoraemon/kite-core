@@ -47,7 +47,7 @@ func TestConnection(ctx context.Context, baseURL, apiKey, model string) error {
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		detail, _ := io.ReadAll(io.LimitReader(resp.Body, 512))
+		detail, _ := io.ReadAll(io.LimitReader(resp.Body, 4096))
 		// Redact before truncating: a provider that echoes the credential
 		// may place it across the truncation boundary, and a partial secret
 		// would survive a strings.Contains check performed after the cut.

@@ -77,7 +77,7 @@ func TestTUIRejectsUnknownThemeBeforeSessionSetup(t *testing.T) {
 // key in the environment or config file, a remote default endpoint produces
 // actionable guidance rather than a provider 401.
 func TestRunGuidesWhenNoCredentialConfigured(t *testing.T) {
-	cmd := exec.Command("go", "run", ".", "run", "hello")
+	cmd := exec.Command(buildKite(t), "run", "hello")
 	cmd.Env = []string{
 		"PATH=" + os.Getenv("PATH"),
 		"HOME=" + t.TempDir(),
@@ -91,8 +91,8 @@ func TestRunGuidesWhenNoCredentialConfigured(t *testing.T) {
 		t.Fatalf("guidance missing from output:\n%s", text)
 	}
 	var exitErr *exec.ExitError
-	if !errors.As(err, &exitErr) || exitErr.ExitCode() != 1 {
-		t.Fatalf("error = %v, want failure", err)
+	if !errors.As(err, &exitErr) || exitErr.ExitCode() != 2 {
+		t.Fatalf("error = %v, want configuration error exit code 2", err)
 	}
 }
 

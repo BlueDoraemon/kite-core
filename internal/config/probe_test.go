@@ -54,26 +54,32 @@ func TestTestConnectionAuthFailureIsSecretFree(t *testing.T) {
 	}
 }
 
-// TestTestConnectionRedactsBeforeTruncating covers a credential that straddles
+// TestTestConnectionRedactsBeforeTruncating covers credentials that straddle
 // the truncation boundary: redacting after the cut would leave a partial
-// secret in the message.
+// secret in the message. The longer case (1 KiB) exceeds the old read window
+// that immediately preceded redaction, so a credential's leading bytes must
+// still be redacted rather than survive the narrower read cap.
 func TestTestConnectionRedactsBeforeTruncating(t *testing.T) {
-	secret := "sk-" + strings.Repeat("x", 400)
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusUnauthorized)
-		_, _ = w.Write([]byte(secret))
-	}))
-	defer srv.Close()
-	err := TestConnection(context.Background(), srv.URL, secret, "m")
-	if err == nil {
-		t.Fatal("expected probe failure")
-	}
-	msg := err.Error()
-	if strings.Contains(msg, "sk-xxxx") {
-		t.Fatalf("partial credential survived truncation: %s", msg[:min(len(msg), 200)])
-	}
-	if !strings.Contains(msg, "[redacted]") {
-		t.Fatalf("expected redaction marker, got: %s", msg[:min(len(msg), 200)])
+	for _, secret := range []string{
+		"sk-" + strings.Repeat("x", 400),
+		"sk-" + strings.Repeat("y", 1024),
+	} {
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusUnauthorized)
+			_, _ = w.Write([]byte(secret))
+		}))
+		err := TestConnection(context.Background(), srv.URL, secret, "m")
+		srv.Close()
+		if err == nil {
+			t.Fatal("expected probe failure")
+		}
+		msg := err.Error()
+		if strings.Contains(msg, "sk-xxx") || strings.Contains(msg, "sk-yyy") {
+			t.Fatalf("partial credential survived truncation: %s", msg[:min(len(msg), 200)])
+		}
+		if !strings.Contains(msg, "[redacted]") {
+			t.Fatalf("expected redaction marker, got: %s", msg[:min(len(msg), 200)])
+		}
 	}
 }
 

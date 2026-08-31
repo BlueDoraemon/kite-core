@@ -113,7 +113,11 @@ func cmdSetup(args []string) int {
 			}
 		}
 		if *baseURL == "" {
-			fmt.Fprintln(os.Stderr, "kite: non-interactive setup needs -provider or -base-url")
+			if *provider != "" {
+				fmt.Fprintf(os.Stderr, "kite: -provider %s requires -base-url (the preset defines no endpoint)\n", *provider)
+			} else {
+				fmt.Fprintln(os.Stderr, "kite: non-interactive setup needs -provider or -base-url")
+			}
 			return 2
 		}
 		if *model == "" {

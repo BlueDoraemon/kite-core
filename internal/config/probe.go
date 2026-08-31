@@ -48,7 +48,10 @@ func TestConnection(ctx context.Context, baseURL, apiKey, model string) error {
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
 		detail, _ := io.ReadAll(io.LimitReader(resp.Body, 512))
-		msg := strings.TrimSpace(string(detail))
+		// Redact before truncating: a provider that echoes the credential
+		// may place it across the truncation boundary, and a partial secret
+		// would survive a strings.Contains check performed after the cut.
+		msg := withoutSecret(strings.TrimSpace(string(detail)), apiKey)
 		if msg == "" {
 			msg = resp.Status
 		} else {
@@ -56,11 +59,11 @@ func TestConnection(ctx context.Context, baseURL, apiKey, model string) error {
 		}
 		switch resp.StatusCode {
 		case http.StatusUnauthorized, http.StatusForbidden:
-			return fmt.Errorf("authentication failed (%d): check the credential; the provider said: %s", resp.StatusCode, withoutSecret(msg, apiKey))
+			return fmt.Errorf("authentication failed (%d): check the credential; the provider said: %s", resp.StatusCode, msg)
 		case http.StatusPaymentRequired:
 			return fmt.Errorf("the provider account has no credit (%d); top it up or choose another provider", resp.StatusCode)
 		default:
-			return fmt.Errorf("provider returned %d: %s", resp.StatusCode, withoutSecret(msg, apiKey))
+			return fmt.Errorf("provider returned %d: %s", resp.StatusCode, msg)
 		}
 	}
 	var out struct {

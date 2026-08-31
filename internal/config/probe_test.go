@@ -54,6 +54,29 @@ func TestTestConnectionAuthFailureIsSecretFree(t *testing.T) {
 	}
 }
 
+// TestTestConnectionRedactsBeforeTruncating covers a credential that straddles
+// the truncation boundary: redacting after the cut would leave a partial
+// secret in the message.
+func TestTestConnectionRedactsBeforeTruncating(t *testing.T) {
+	secret := "sk-" + strings.Repeat("x", 400)
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusUnauthorized)
+		_, _ = w.Write([]byte(secret))
+	}))
+	defer srv.Close()
+	err := TestConnection(context.Background(), srv.URL, secret, "m")
+	if err == nil {
+		t.Fatal("expected probe failure")
+	}
+	msg := err.Error()
+	if strings.Contains(msg, "sk-xxxx") {
+		t.Fatalf("partial credential survived truncation: %s", msg[:min(len(msg), 200)])
+	}
+	if !strings.Contains(msg, "[redacted]") {
+		t.Fatalf("expected redaction marker, got: %s", msg[:min(len(msg), 200)])
+	}
+}
+
 func TestTestConnectionUnreachable(t *testing.T) {
 	err := TestConnection(context.Background(), "http://127.0.0.1:9/v1", "", "m")
 	if err == nil || !strings.Contains(err.Error(), "cannot reach") {

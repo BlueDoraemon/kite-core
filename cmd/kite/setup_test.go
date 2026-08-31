@@ -20,12 +20,21 @@ func setupEnv(t *testing.T) []string {
 	}
 }
 
-func TestSetupNonInteractiveWritesPresetConfig(t *testing.T) {
+// buildKite compiles the CLI so exit-code assertions observe the binary's own
+// status; launching through `go run` would mask it, because go run reports its
+// own failure code rather than the child's.
+func buildKite(t *testing.T) string {
+	t.Helper()
 	bin := filepath.Join(t.TempDir(), "kite")
 	build := exec.Command("go", "build", "-o", bin, ".")
 	if out, err := build.CombinedOutput(); err != nil {
 		t.Fatalf("build: %v\n%s", err, out)
 	}
+	return bin
+}
+
+func TestSetupNonInteractiveWritesPresetConfig(t *testing.T) {
+	bin := buildKite(t)
 	env := setupEnv(t)
 	cmd := exec.Command(bin, "setup", "-provider", "ollama", "-skip-test")
 	cmd.Env = env
@@ -59,12 +68,11 @@ func TestSetupNonInteractiveWritesPresetConfig(t *testing.T) {
 }
 
 func TestSetupRejectsUnknownProvider(t *testing.T) {
-	env := setupEnv(t)
-	cmd := exec.Command("go", "run", ".", "setup", "-provider", "notreal", "-skip-test")
-	cmd.Env = env
+	cmd := exec.Command(buildKite(t), "setup", "-provider", "notreal", "-skip-test")
+	cmd.Env = setupEnv(t)
 	out, err := cmd.CombinedOutput()
 	var exitErr *exec.ExitError
-	if !errors.As(err, &exitErr) || exitErr.ExitCode() != 1 {
+	if !errors.As(err, &exitErr) || exitErr.ExitCode() != 2 {
 		t.Fatalf("err = %v\n%s", err, out)
 	}
 	if !strings.Contains(string(out), "unknown provider") {
@@ -73,9 +81,8 @@ func TestSetupRejectsUnknownProvider(t *testing.T) {
 }
 
 func TestSetupProbeFailureBlocksSave(t *testing.T) {
-	env := setupEnv(t)
-	cmd := exec.Command("go", "run", ".", "setup", "-base-url", "http://127.0.0.1:9/v1", "-model", "m")
-	cmd.Env = env
+	cmd := exec.Command(buildKite(t), "setup", "-base-url", "http://127.0.0.1:9/v1", "-model", "m")
+	cmd.Env = setupEnv(t)
 	out, err := cmd.CombinedOutput()
 	var exitErr *exec.ExitError
 	if !errors.As(err, &exitErr) || exitErr.ExitCode() != 1 {
@@ -87,9 +94,8 @@ func TestSetupProbeFailureBlocksSave(t *testing.T) {
 }
 
 func TestSetupInteractiveViaStdin(t *testing.T) {
-	env := setupEnv(t)
-	cmd := exec.Command("go", "run", ".", "setup", "-skip-test")
-	cmd.Env = env
+	cmd := exec.Command(buildKite(t), "setup", "-skip-test")
+	cmd.Env = setupEnv(t)
 	cmd.Stdin = strings.NewReader("groq\n\n\nMY_GROQ_KEY\n\n")
 	out, err := cmd.CombinedOutput()
 	if err != nil {
@@ -98,5 +104,20 @@ func TestSetupInteractiveViaStdin(t *testing.T) {
 	text := string(out)
 	if !strings.Contains(text, "Providers:") || !strings.Contains(text, "Saved ") {
 		t.Fatalf("output = %s", text)
+	}
+}
+
+// TestSetupCustomPresetNeedsBaseURL checks that the usage error names the
+// missing value rather than implying no flag was supplied at all.
+func TestSetupCustomPresetNeedsBaseURL(t *testing.T) {
+	cmd := exec.Command(buildKite(t), "setup", "-provider", "custom", "-skip-test")
+	cmd.Env = setupEnv(t)
+	out, err := cmd.CombinedOutput()
+	var exitErr *exec.ExitError
+	if !errors.As(err, &exitErr) || exitErr.ExitCode() != 2 {
+		t.Fatalf("err = %v\n%s", err, out)
+	}
+	if !strings.Contains(string(out), "-provider custom requires -base-url") {
+		t.Fatalf("output = %s", out)
 	}
 }

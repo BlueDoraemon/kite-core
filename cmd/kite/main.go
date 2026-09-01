@@ -17,6 +17,7 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/BlueDoraemon/kite-core/internal/config"
 	"github.com/BlueDoraemon/kite-core/internal/core"
 	"github.com/BlueDoraemon/kite-core/internal/crush"
 	kitelint "github.com/BlueDoraemon/kite-core/internal/lint"
@@ -40,6 +41,8 @@ func run(args []string) int {
 	switch cmd {
 	case "run":
 		return cmdRun(rest)
+	case "setup":
+		return cmdSetup(rest)
 	case "tui":
 		return cmdTUI(rest)
 	case "lint":
@@ -71,6 +74,7 @@ func usage() {
 
 Usage:
   kite run [flags] <prompt>          Run a prompt in the current directory
+  kite setup [flags]                 Configure a provider and write the config file
   kite tui [flags] [session-id]      Open the interactive terminal workspace
   kite lint [flags] [path ...]       Run deterministic and optional style review
   kite resume <session-id> [prompt]  Resume a session
@@ -82,6 +86,8 @@ Usage:
 
 Environment:
   KITE_API_KEY, KITE_BASE_URL, KITE_MODEL, KITE_DATA_DIR, KITE_THEME, NO_COLOR
+  Config file (XDG/APPDATA kite/config.json) supplies base URL, model, and key;
+  precedence is flags > environment > config file > defaults. Run "kite setup".
   --from-crush reads the Crush-selected large model, credential, and endpoint
 
 Exit codes: 0 completed, 1 runtime/verification/lint failure, 2 usage/config error
@@ -237,11 +243,11 @@ func cmdTUI(args []string) int {
 	return 0
 }
 
-// providerConfig resolves explicit flags and the API key environment setting,
-// optionally importing remaining values from Crush. With Crush import active,
-// only the API key environment variable overrides an imported value.
+// providerConfig resolves flags, environment variables, and the user config
+// file through internal/config, optionally importing remaining values from
+// Crush. With Crush import active, only the API key environment variable
+// overrides an imported value.
 func providerConfig(baseURL, model *string, fromCrush bool) (*openai.Provider, error) {
-	apiKey := os.Getenv("KITE_API_KEY")
 	if fromCrush {
 		imp, err := crush.Load()
 		if err != nil {
@@ -253,17 +259,24 @@ func providerConfig(baseURL, model *string, fromCrush bool) (*openai.Provider, e
 		if *model == "" {
 			*model = imp.Model
 		}
-		if apiKey == "" {
-			apiKey = imp.APIKey
+		if apiKey := os.Getenv("KITE_API_KEY"); apiKey != "" {
+			return openai.New(*baseURL, apiKey, *model), nil
 		}
+		return openai.New(*baseURL, imp.APIKey, *model), nil
 	}
-	if *baseURL == "" {
-		*baseURL = envOr("KITE_BASE_URL", "https://api.openai.com/v1")
+	loaded, err := config.Load("")
+	if err != nil {
+		return nil, err
 	}
-	if *model == "" {
-		*model = envOr("KITE_MODEL", "gpt-4o-mini")
+	r := config.Resolve(*baseURL, *model, loaded)
+	if r.APIKey == "" && !strings.HasPrefix(r.BaseURL, "http://localhost") && !strings.HasPrefix(r.BaseURL, "http://127.0.0.1") {
+		path := loaded.Path
+		if path == "" {
+			path = "the platform config location"
+		}
+		return nil, fmt.Errorf("no model credential configured. Set KITE_API_KEY, or add \"api_key\" (or \"key_env\") to %s. Local servers such as Ollama need no key: point KITE_BASE_URL at them", path)
 	}
-	return openai.New(*baseURL, apiKey, *model), nil
+	return openai.New(r.BaseURL, r.APIKey, r.Model), nil
 }
 
 func envOr(key, def string) string {

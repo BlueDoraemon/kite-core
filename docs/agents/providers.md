@@ -12,10 +12,38 @@ streams over Server-Sent Events.
 | `KITE_MODEL` | `-model` | `gpt-4o-mini` | Model identifier |
 
 Without `--from-crush`, explicit flags override Kite environment variables,
-which override defaults. With `--from-crush`, explicit `-base-url` and
-`-model` flags override imported values, and `KITE_API_KEY` overrides the
-imported credential. `KITE_BASE_URL` and `KITE_MODEL` are only consulted when
-Crush import is not active.
+which override the user config file, which overrides defaults. With
+`--from-crush`, explicit `-base-url` and `-model` flags override imported
+values, and `KITE_API_KEY` overrides the imported credential. `KITE_BASE_URL`,
+`KITE_MODEL`, and the config file are only consulted when Crush import is not
+active.
+
+## Config file
+
+The config file lives at `$XDG_CONFIG_HOME/kite/config.json` (default
+`~/.config/kite/config.json`) on Unix and `%APPDATA%\kite\config.json` on
+Windows. It follows the additive `kite.config/v1` contract; unknown fields are
+ignored and a mismatched `version` is rejected rather than silently misread.
+
+```json
+{
+  "version": "kite.config/v1",
+  "base_url": "https://api.example.com/v1",
+  "model": "some-model",
+  "key_env": "MY_PROVIDER_KEY",
+  "api_key": "optional inline credential"
+}
+```
+
+- `key_env` names an environment variable holding the credential and takes
+  precedence over an inline `api_key`, keeping secrets out of the file.
+- Files are written with user-only (`0600`) permissions where supported.
+- A malformed or unsupported-version file is a configuration error (exit `2`),
+  never silent fallback to defaults.
+- When no credential resolves from any layer and the base URL is remote, Kite
+  reports actionable guidance instead of attempting the request. Local
+  endpoints (`http://localhost` or `http://127.0.0.1`, for example Ollama)
+  need no credential.
 
 ## Streaming behaviour
 

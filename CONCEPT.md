@@ -44,28 +44,23 @@ can be productive in under two minutes.
 
 ### What is in scope
 
-- **`kite setup`** — an interactive wizard that:
-  - Detects existing configuration (env vars, config file, `--from-crush`
-    availability).
-  - Lists provider presets (OpenAI, Anthropic, Groq, OpenRouter, Ollama,
-    custom) with their base URLs and sensible model defaults.
-  - Walks through getting a key for the chosen provider.
-  - Tests the connection with a minimal request before writing anything.
-  - Writes a config file with user-only permissions.
-  - Supports a non-interactive mode for scripting (`kite setup -provider
-    openai -key sk-...`).
 - **Config file** — `~/.config/kite/config.json` (Unix) and the platform
   equivalent on Windows, user-only permissions, with precedence:
-  `flags > env > config file > defaults`.
+  `flags > env > config file > defaults`. ✅ *done*
+- **First-run guidance** — `kite run` with no configuration explains how to
+  supply a credential instead of failing cryptically. ✅ *done*
 - **Provider presets** — a small table of known providers. Each preset knows
-  its base URL and a sensible default model.
+  its base URL and a sensible default model. ✅ *done*
 - **Connection test** — a lightweight provider round-trip used by the wizard
   so a bad key or endpoint is caught at setup time, not on the first real
-  run.
-- **First-run guidance** — `kite run` with no configuration says "run
-  `kite setup`" instead of failing cryptically.
-- **Documentation** — a setup page, updated quickstart, CLI, providers,
-  security, and troubleshooting docs.
+  run. ✅ *done*
+- **`kite setup`** — an interactive wizard that detects existing
+  configuration, lists provider presets, walks through getting a key, tests
+  the connection before writing anything, saves with user-only permissions,
+  and supports a non-interactive mode for scripting (`kite setup -provider
+  openai -key-env OPENAI_API_KEY`). ✅ *done*
+- **Documentation** — updated quickstart, CLI, providers, security, and
+  README docs. ✅ *done*
 
 ### What is out of scope (phase 2)
 

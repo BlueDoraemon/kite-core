@@ -3,12 +3,18 @@
 This guide walks you through a first task end-to-end: run, inspect, fix,
 verify, and interpret a result.
 
-## 1. Run
+## 1. Configure and run
 
 ```sh
-export KITE_API_KEY=sk-...
+kite setup
+export OPENAI_API_KEY=sk-...   # or the variable you chose in setup
 kite run "create a file called hello.txt containing 'hello kite'"
 ```
+
+`kite setup` lists known providers, tests the connection, and writes the
+config file once. Environment variables (`KITE_API_KEY`, `KITE_BASE_URL`,
+`KITE_MODEL`) still work on their own and override the file; local servers
+like Ollama need no key at all.
 
 Kite streams the model's output, runs tools, and prints a structured result
 when it finishes:

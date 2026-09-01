@@ -42,6 +42,8 @@ all release targets cross-compile.
   normalisation, and the bounded advisory model-review layer.
 - `internal/tui` — the ANSI/plain-text event-ledger terminal workspace. It is
   a view over `core.Session`, never a second agent loop.
+- `internal/config` — the `kite.config/v1` user config file and provider
+  resolution with flags > environment > config > defaults precedence.
 - `internal/crush` — reads Crush's persisted config for `--from-crush`.
 - `cmd/kite` — the CLI entry point.
 
